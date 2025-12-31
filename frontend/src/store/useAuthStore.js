@@ -81,16 +81,17 @@ export const useAuthStore = create((set, get) => ({
   },
 
   connectSocket: () => {
-    const { authUser } = get();
-    if (!authUser || get().socket?.connected) return;
+  const { authUser, socket } = get();
+  if (!authUser || socket?.connected) return;
 
-    const socket = io(BASE_URL, {
-      withCredentials: true, // this ensures cookies are sent with the connection
-    });
+  const socketInstance = io(import.meta.env.VITE_SOCKET_URL, {
+    withCredentials: true,
+    transports: ["websocket", "polling"], // helps Render reliability
+  });
 
-    socket.connect();
+  set({ socket: socketInstance });
+},
 
-    set({ socket });
 
     // listen for online users event
     socket.on("getOnlineUsers", (userIds) => {
